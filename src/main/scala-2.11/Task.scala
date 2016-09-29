@@ -16,6 +16,10 @@ object Main extends App with LazyLogging {
   for (row <- rows) {
     println(s"${row(0)}|${row(1)}|${row(2)}|${row(3)}|${row(4)}|${row(5)}|${row(6)}|${row(7)}")
   }
+  // First Step
+  val result = rows.groupBy(_(6)).mapValues(_.size)
+  println(result)
+
 
   def using[A <: { def close(): Unit }, B](resource: A)(f: A => B): B =
     try {
