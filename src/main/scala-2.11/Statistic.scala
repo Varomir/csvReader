@@ -11,29 +11,29 @@ object Statistic extends LazyLogging {
     airports.toArray
   }
 
-  def stepFirst(data: Array[Array[String]]): Array[(String, Int)] = {
+  def stepFirst(data: Array[Array[String]], printToConsole: Boolean = false): Array[(String, Int)] = {
     logger.info("First task")
     logger.debug("> function 'stepFirst' START")
     val step1result = getAirports(data).map(airport => (airport, data.count(_(7) == airport)))
-    //printTuple2(step1result)
+    printTuple2(step1result, printToConsole)
     writeToFile(step1result, "first.csv")
     logger.debug("< function 'stepFirst' END")
     step1result
   }
 
-  def stepSecond(data: Array[Array[String]]): Array[(String, Int)] = {
+  def stepSecond(data: Array[Array[String]], printToConsole: Boolean = false): Array[(String, Int)] = {
     logger.info("Second task")
     logger.debug("> function 'stepSecond' START")
     val origin = data.groupBy(_ (6)) mapValues (_.size)
     val dest: scala.collection.immutable.Map[String, Int] = data.groupBy(_ (7)) mapValues (_.size)
     val step2result = getAirports(data).map(key => (key, dest.getOrElse(key, 0) - origin.getOrElse(key, 0))).filter(_._2 != 0)
-    //printTuple2(step2result)
+    printTuple2(step2result, printToConsole)
     writeToFile(step2result, "second.csv")
     logger.debug("< function 'stepSecond' END")
     step2result
   }
 
-  def stepThird(data: Array[Array[String]]): Map[Int, Array[(String, Int)]] = {
+  def stepThird(data: Array[Array[String]], printToConsole: Boolean = false): Map[Int, Array[(String, Int)]] = {
     logger.info("Third task")
     logger.debug("> function 'stepThird' START")
     val pairWeekDest = data.map(row => (extractWeek(row(0), row(2), row(3)), row(7)))
@@ -41,20 +41,26 @@ object Statistic extends LazyLogging {
     val sGrp = scala.collection.immutable.TreeMap(grouped.toArray:_*)
     val groupedPerWeekOfYear: scala.collection.immutable.Map[Int,Array[(String, Int)]] = sGrp.flatMap(week => Map(week._1 -> getAirports(data).map(airport => (airport, week._2.count((_)._2 == airport) ))))
     //print result
-    /*for ((weekNum, values) <- groupedPerWeekOfYear) {
-      println("W" +weekNum)
-      for (airportsArray <- values) {
-        println("  " +airportsArray._1 + ": " + airportsArray._2)
+    printToConsole match {
+      case true => for ((weekNum, values) <- groupedPerWeekOfYear) {
+        println ("W" + weekNum)
+        for (airportsArray <- values) {
+          println ("  " + airportsArray._1 + ": " + airportsArray._2)
+        }
       }
-    }*/
+      case false => ()
+    }
     writeToTextFile(groupedPerWeekOfYear, "third.txt")
     logger.debug("< function 'stepThird' END")
     groupedPerWeekOfYear
   }
 
-  private def printTuple2[A, B](input: Array[Tuple2[A, B]]): Unit = {
-    for (row <- input) {
-      println("  " + row._1 + " " + row._2)
+  private def printTuple2[A, B](input: Array[Tuple2[A, B]], print: Boolean): Unit = {
+    print match {
+      case true => for (row <- input) {
+        println("  " + row._1 + " " + row._2)
+      }
+      case false => ()
     }
   }
 
