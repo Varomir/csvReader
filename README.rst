@@ -1,4 +1,4 @@
-Touch Scala
+Touch Scala collection
 ===========
 
-Just type sbt run
+Just type 'sbt run' and 'sbt test'
